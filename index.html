@@ -1,0 +1,44 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Three.js on Django</title>
+    <style>
+    *{
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body, html{
+        overflow-x: hidden;
+    }
+
+    
+    body {
+        text-align: center;
+        font-family: Arial, sans-serif;
+    }
+    button {
+        margin-top: 20px;
+        padding: 10px 20px;
+        font-size: 18px;
+        background-color: #0077ff;
+        color: white;
+        border: none;
+        cursor: pointer;
+        border-radius: 5px;
+    }
+    button:hover {
+        background-color: #0055aa;
+    }
+    </style>
+    <script type="module" src="{% static 'js/main.js' %}"></script>
+</head>
+<body>
+    <h1>Voice Animation</h1>
+    <button id="start-chat" >Start Chat</button>
+</body>
+</html>
