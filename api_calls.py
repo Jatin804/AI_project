@@ -46,6 +46,10 @@ def chat_with_llama(user_input):
     except Exception as e:
         print("An error occurred:", str(e))
 
+
+
+        
+
 # Run the chat function
 # if __name__ == "__main__":
 #     while True:
