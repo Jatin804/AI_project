@@ -26,23 +26,14 @@ def capture_voice():
         return None
 
 def voice_to_text():
-
     audio = capture_voice()
 
     if not audio:
-        return {"text": "No speech detected"}
+        return "text No speech detected"
     
     try:
         text = recognizer.recognize_google(audio)
         return text
-    
-    except sr.UnknownValueError:
-        return {"Sorry, I couldn't understand you."}
-    
-    except sr.RequestError as e:
-        return {"Error with recognition service: {e}"}
-    
     except Exception as e:
-        return {"Unexpected error: {e}"}
-
+        return f"Error : In generating"
 
