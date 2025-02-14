@@ -16,11 +16,8 @@ def capture_voice():
             print("Listening...")
             text = recognizer.listen(source)
 
-            # Calculate loudness (RMS energy)
-            loudness = sum(abs(sample) for sample in text.frame_data) / len(text.frame_data)
-
-        return text, loudness
-
+        return text
+    
     except sr.WaitTimeoutError:
         print("No speech detected within the time limit. Try again.")
         return None
@@ -28,33 +25,24 @@ def capture_voice():
         print(f"Error capturing voice: {e}")
         return None
 
-def voice_to_text(audio, loudness):
+def voice_to_text(audio):
 
     audio, loudness = capture_voice()
 
     if not audio:
-        return {"text": "No speech detected", "loudness": 0}
+        return {"text": "No speech detected"}
     
     try:
         text = recognizer.recognize_google(audio)
-        return {"text": text, "loudness": loudness}
+        return text
     
     except sr.UnknownValueError:
-        return {"text": "Sorry, I couldn't understand you.", "loudness": 0}
+        return {"Sorry, I couldn't understand you."}
     
     except sr.RequestError as e:
-        return {"text": f"Error with recognition service: {e}", "loudness": 0}
+        return {"Error with recognition service: {e}"}
     
     except Exception as e:
-        return {"text": f"Unexpected error: {e}", "loudness": 0}
+        return {"Unexpected error: {e}"}
 
 
-
-
-
-# audio_data = capture_voice()
-# if audio_data:
-#     response = voice_to_text(audio_data)
-#     print(response)
-# else:
-#     print("No audio captured or timeout occurred.")

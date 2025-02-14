@@ -1,5 +1,6 @@
 import pygame
 from PIL import Image, ImageSequence
+from . import get_speech
 
 pygame.init()
 
@@ -19,7 +20,7 @@ gif_width, gif_height = gif.size
 frame_rect = pygame.Rect(0, 0, gif_width, gif_height)
 
 # Example sentence
-sentence = "I am a robot"  # The text that determines size changes
+sentence = get_speech.voice_to_text() # The text that determines size changes
 word_lengths = [len(word) for word in sentence.split()]  # [1, 2, 1, 5]
 print(f"Scaling pattern based on word lengths: {word_lengths}")
 
