@@ -1,28 +1,28 @@
 import pygame
 from PIL import Image, ImageSequence
-from . import get_speech
+import get_speech
 
 pygame.init()
 
-# Get the default resolution of the device
+# display rendering 
 display_info = pygame.display.Info()
-WIDTH, HEIGHT = display_info.current_w, display_info.current_h  # Device screen size
-
-# Create a resizable window
+WIDTH, HEIGHT = display_info.current_w, display_info.current_h
 screen = pygame.display.set_mode((WIDTH, HEIGHT), pygame.RESIZABLE)
 
-# Load GIF and extract frames
-gif = Image.open("gif2.gif")  # Replace with your GIF path
+# main gif variable
+gif = Image.open("gif2.gif")
 frames = [pygame.image.fromstring(frame.convert("RGBA").tobytes(), frame.size, "RGBA") for frame in ImageSequence.Iterator(gif)]
-
-# Get original GIF size
 gif_width, gif_height = gif.size
-frame_rect = pygame.Rect(0, 0, gif_width, gif_height)
+frame_rect = pygame.Rect(0,0, gif_width, gif_height)
 
-# Example sentence
-sentence = get_speech.voice_to_text() # The text that determines size changes
+
+
+# Listening process
+sentence = "i am a robot"                 # get_speech.voice_to_text() # The text that determines size changes
 word_lengths = [len(word) for word in sentence.split()]  # [1, 2, 1, 5]
 print(f"Scaling pattern based on word lengths: {word_lengths}")
+
+
 
 # Animation variables
 frame_index = 0
@@ -31,8 +31,11 @@ clock = pygame.time.Clock()
 # Scale transition variables
 word_index = 0  # Which word's length we are using
 scale_factor = 1.0  # Initial scale factor
-target_scale = 1.0 + word_lengths[word_index] * 0.1  # Set target scale based on word length
-scale_speed = 0.05  # Speed of transition
+target_scale = 1.0 + word_lengths[word_index] * 0.1 
+scale_speed = 0.1  # Speed of transition
+
+
+
 
 running = True
 while running:
@@ -69,6 +72,6 @@ while running:
         target_scale = 1.0 + word_lengths[word_index] * 0.1  # Update target scale
 
     pygame.display.flip()  # Update the display
-    clock.tick(10)  # Adjust speed (FPS)
+    clock.tick(40)  # Adjust speed (FPS)
 
 pygame.quit()

@@ -25,9 +25,9 @@ def capture_voice():
         print(f"Error capturing voice: {e}")
         return None
 
-def voice_to_text(audio):
+def voice_to_text():
 
-    audio, loudness = capture_voice()
+    audio = capture_voice()
 
     if not audio:
         return {"text": "No speech detected"}
