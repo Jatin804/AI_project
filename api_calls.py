@@ -1,9 +1,8 @@
-# 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
 
 from groq import Groq
 
 def chat_with_llama(user_input):
-    api_key = "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"
+    api_key = "fucking_api"
 
     client = Groq(api_key=api_key)
 
