@@ -56,7 +56,7 @@ def chat_with_llama(user_input: str) -> str:
     if not should_respond(user_input):
         return "Sorry, I only assist with Linux command-line usage. Please ask a related question."
 
-    api_key = "API_KEY" 
+    api_key = "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"
     client = Groq(api_key=api_key)
 
     messages = [

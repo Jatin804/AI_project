@@ -1,12 +1,15 @@
-from PyQt5.QtWidgets import QApplication
 import sys
-from PyQt5.QtWidgets import QWidget, QLabel, QPushButton, QTextEdit, QVBoxLayout, QHBoxLayout
+from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QPushButton, QTextEdit, QVBoxLayout, QHBoxLayout
 from PyQt5.QtGui import QMovie, QPixmap, QFont
-from PyQt5.QtCore import Qt
-from voice_thread import VoiceThread
+from PyQt5.QtCore import Qt, QThread, pyqtSignal
 from speak_clean import speak_message, extract_shell_commands, execute_shell_command
 from api import chat_with_llama
+import speech_recognition as sr
+from voice_thread import VoiceThread
 
+
+
+# ----------- GUI MODE -----------
 class SystemAIGUI(QWidget):
     def __init__(self):
         super().__init__()
@@ -17,10 +20,12 @@ class SystemAIGUI(QWidget):
         self.init_ui()
 
     def init_ui(self):
+
+        self.listening = False
+
         self.gif_label = QLabel()
         self.gif_label.setFixedSize(600, 600)
         self.gif_label.setStyleSheet("border: 2px solid #00FFFF; border-radius: 10px;")
-
         self.blank_image = QPixmap("assets/black_image_600x600.png")
         self.movie = QMovie("assets/gif.gif")
         self.movie.setScaledSize(self.gif_label.size())
@@ -69,20 +74,26 @@ class SystemAIGUI(QWidget):
         self.gif_label.setPixmap(self.blank_image)
 
     def start_system_ai(self):
-        if self.voice_thread and self.voice_thread.isRunning():
+        if self.listening:
             self.output_box.append("[!] Already listening...")
             return
         self.gif_label.setMovie(self.movie)
         self.movie.start()
         self.output_box.append("[+] SYSTEMAI started. Listening...")
+        self.listening = True
         self.listen_voice_input()
-
 
     def stop_system_ai(self):
         self.set_idle_state()
+        self.listening = False
         self.output_box.append("[-] SYSTEMAI stopped.")
+        if self.voice_thread and self.voice_thread.isRunning():
+            self.voice_thread.terminate()
+            self.voice_thread.wait()
 
     def listen_voice_input(self):
+        if not self.listening:
+            return
         try:
             self.voice_thread = VoiceThread()
             self.voice_thread.result_signal.connect(self.process_transcription)
@@ -91,17 +102,16 @@ class SystemAIGUI(QWidget):
             self.output_box.append(f"[Error] Voice input failed: {e}")
             speak_message("Voice input failed.")
 
-
     def process_transcription(self, text):
+        if not self.listening:
+            return
         self.output_box.append(f"[Voice] {text}")
         speak_message("Processing your input.")
-
-        ai_response = chat_with_llama(text)                     # API call 
+        ai_response = chat_with_llama(text)
         if not ai_response:
             self.output_box.append("[!] AI did not respond.")
             speak_message("AI did not respond.")
             return
-        
         self.output_box.append(f"[AI] {ai_response}")
         speak_message("Done processing.")
         commands = extract_shell_commands(ai_response)
@@ -119,16 +129,55 @@ class SystemAIGUI(QWidget):
         else:
             self.output_box.append("[!] No valid command found.")
             speak_message("No valid command found.")
-
-
-        
         self.listen_voice_input()
 
 
+# ----------- CLI MODE -----------
+def handle_voice_result(text):
+    print("Recognized Voice:", text)
+    response = chat_with_llama(text)
+    print("LLM Response:", response)
+    commands = extract_shell_commands(response)
+    for command in commands:
+        print(f"Executing: {command}")
+        result = execute_shell_command(command)
+        if result:
+            speak_message("Command executed successfully.")
+            print("Output:", result.stdout)
+        else:
+            speak_message("Command execution failed.")
+            print("Error:", result.stderr)
 
 
+# ----------- ENTRY POINT -----------
 if __name__ == "__main__":
-    app = QApplication(sys.argv)
-    window = SystemAIGUI()
-    window.show()
-    sys.exit(app.exec_())
+    mode = input("Choose mode: (1) GUI, (2) CLI Voice, (3) CLI Text: ")
+
+    if mode == "1":
+        app = QApplication(sys.argv)
+        window = SystemAIGUI()
+        window.show()
+        sys.exit(app.exec_())
+
+    elif mode == "2":
+        app = QApplication(sys.argv)
+        voice = VoiceThread()
+        voice.result_signal.connect(handle_voice_result)
+        voice.start()
+        sys.exit(app.exec_())
+
+    elif mode == "3":
+        text = input("Enter your command: ")
+        response = chat_with_llama(text)
+        print("LLM Response:", response)
+        commands = extract_shell_commands(response)
+        for command in commands:
+            print(f"Executing: {command}")
+            result = execute_shell_command(command)
+            if result:
+                speak_message(result.stdout)
+                print("Output:", result.stdout)
+                print("Error:", result.stderr)
+    else:
+        print("Invalid option.")
+
